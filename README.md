@@ -115,13 +115,14 @@ def boosted_lwr(X, y, xnew, kern, tau, intercept):
   output = tree_model.predict(xnew) + lw_reg(X,y,xnew,kern,tau,intercept)
   return output 
 ```
-I am going to import xgboost because It tells us about the difference between actual values and predicted values. It tells us how the results we have are related to the real values. The xgb function also analyzes the complexity of the model. It penalizes complex models through both LASSO (L1) and Ridge (L2) regularization to prevent overfitting. The ultimate goal is to find simple and accurate models. xgboost uses regularization parameters like gamma, alpha, and lambda. 
+I am going to import xgboost because It tells us about the difference between actual values and predicted values. It tells us how the results we have are related to the real values. The xgb function also analyzes the complexity of the model. It penalizes complex models through both LASSO (L1) and Ridge (L2) regularization to prevent overfitting. The ultimate goal is to find simple and accurate models. xgboost uses regularization parameters like gamma, alpha, and lambda. Decision trees are created in a sequential form and weights are assigned to independent variables that predicts the results. 
+
 
 
 ```Python
 import xgboost as xgb
 ```
-
+While training a neural network on the sample data, One of the critical issues is Overfitting. this happens when we use a high number of epochs than needed. The model loses the ability to perform successfully on a data and it is mored accurate on training data than on the test data. To prevent overfitting, we train the model with an optimal number of epochs.
 ```Python
 # we design a Neural Network for regression
 # We have to decide how many layers we want, how many neurons per layer and the type of activation functions
