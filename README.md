@@ -1,4 +1,10 @@
 # Project3
+
+This presentation includes the concepts of multivariate regression analysis and gradient boosting. For this project I am going to apply lowess regresssion method, boosted lowess, and compare their performance to other regression methods like Random Forest and Neural Networks. For each method, I am going to calculate its cross validated mean square error and mean absolute error to conclude which one is better.
+
+Using Multivariable regression will help us to identify the reationships between dependent and multiple independent variables. I am going to use the cars.csv dataset and I will use indepedent variable X = cars[['ENG','CYL','WGT']].values and dependent variable y = cars['MPG'].values. In addition, we use multivariate regression to predict behavior of the outcome variable and how they change.
+
+Before we start our analysis, we are going to import different libraries that we are going to use in reading and manipulating our data.
 ```Python
 import numpy as np
 import pandas as pd
@@ -18,10 +24,8 @@ import matplotlib.pyplot as plt
 from matplotlib import pyplot
 
 ```
-
+Additionally, we also import libraries to create a Neural Network
 ```Python
-# import libraries for creating a neural network
-# imports for creating a Neural Network
 import keras
 from keras.models import Sequential
 from keras.layers import Dense
@@ -30,6 +34,8 @@ from sklearn.metrics import r2_score
 from tensorflow.keras.optimizers import Adam # they recently updated Tensorflow
 from keras.callbacks import EarlyStopping
 ```
+
+Next, I downloaded the kernels to help in constructing the non-linear decision boundaries using linear classifiers. 
 
 ```Python
 # Tricubic Kernel
@@ -57,7 +63,7 @@ def Epanechnikov(x):
 ```Python
 #Locally Weighted Regressor
 
-#Defining the kernel local regression model
+I created a Locally Weighted Regression Function that performs a regression around a point of interest using only training data that are local to that point. This locally weighted regression function takes the independent, dependent value, the choice of kernel, and hyperparameter tau. In this function, we expect x to be sorted in an increasing order
 
 def lw_reg(X, y, xnew, kern, tau, intercept):
     # tau is called bandwidth K((x-x[i])/(2*tau))
@@ -109,6 +115,9 @@ def boosted_lwr(X, y, xnew, kern, tau, intercept):
   output = tree_model.predict(xnew) + lw_reg(X,y,xnew,kern,tau,intercept)
   return output 
 ```
+I am going to import xgboost because It tells us about the difference between actual values and predicted values. It tells us how the results we have are related to the real values. The xgb function also analyzes the complexity of the model. It penalizes complex models through both LASSO (L1) and Ridge (L2) regularization to prevent overfitting. The ultimate goal is to find simple and accurate models. xgboost uses regularization parameters like gamma, alpha, and lambda. 
+
+
 ```Python
 import xgboost as xgb
 ```
@@ -137,6 +146,7 @@ es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=800)
 ```Python
 import lightgbm as lgb
 ```
+Here, I selected features to use as my dependent and independent variable.
 
 ```Python
 #Let's import our data from google drive
@@ -144,6 +154,7 @@ cars = pd.read_csv('drive/MyDrive/Colab Notebooks/Data_410/data/cars.csv')
 X = cars[['ENG','CYL','WGT']].values
 y = cars['MPG'].values
 ```
+In the code below, I selected the regression analysis method hypothesus to use in calculating the mean absolute errors and mean squared error.
 
 ```Python
 mse_lwr = []
@@ -213,17 +224,29 @@ print('The Cross-validated Mean Absolute Error for NW is : '+str(np.mean(mae_nw)
 ```
 
 The Cross-validated Mean Squared Error for LWR is : 16.87007492097876
+
 The Cross-validated Mean Absolute Error for LWR is : 2.982604175901108
+
 The Cross-validated Mean Squared Error for BLWR is : 16.7211579313579
+
 The Cross-validated Mean Absolute Error for BLWR is : 2.937089045036899
+
 The Cross-validated Mean Squared Error for RF is : 16.73276818715321
+
 The Cross-validated Mean Absolute Error for RF is : 2.9485279800717104
+
 The Cross-validated Mean Squared Error for XGB is : 15.96043146844057
+
 The Cross-validated Mean Absolute Error for XGB is : 2.888928138635418
+
 The Cross-validated Mean Squared Error for NN is : 20.79736161414629
+
 The Cross-validated Mean Absolute Error for NN is : 3.1242736013596013
+
 The Cross-validated Mean Squared Error for NW is : 17.244727908363686
+
 The Cross-validated Mean Absolute Error for NW is : 3.0559279028620145
+
 
 ```Python
 mse_lwr = []
@@ -293,17 +316,29 @@ print('The Cross-validated Mean Absolute Error for NW is : '+str(np.mean(mae_nw)
 ```
 
 The Cross-validated Mean Squared Error for LWR is : 16.87007492097876
+
 The Cross-validated Mean Absolute Error for LWR is : 2.982604175901108
+
 The Cross-validated Mean Squared Error for BLWR is : 16.7211579313579
+
 The Cross-validated Mean Absolute Error for BLWR is : 2.937089045036899
+
 The Cross-validated Mean Squared Error for RF is : 16.4866476278051
+
 The Cross-validated Mean Absolute Error for RF is : 2.9468332649602815
+
 The Cross-validated Mean Squared Error for XGB is : 15.96043146844057
+
 The Cross-validated Mean Absolute Error for XGB is : 2.888928138635418
+
 The Cross-validated Mean Squared Error for NN is : 19.81132299195614
+
 The Cross-validated Mean Absolute Error for NN is : 2.875250464406089
+
 The Cross-validated Mean Squared Error for NW is : 17.244727908363686
+
 The Cross-validated Mean Absolute Error for NW is : 3.0559279028620145
+
 
 ```Python
 mse_lwr = []
@@ -373,12 +408,19 @@ print('The Cross-validated Mean Absolute Error for NW is : '+str(np.mean(mae_nw)
 ```
 
 The Cross-validated Mean Squared Error for LWR is : 17.099342425016683
+
 The Cross-validated Mean Absolute Error for LWR is : 3.0069815242629048
+
 The Cross-validated Mean Squared Error for BLWR is : 17.94330086451972
+
 The Cross-validated Mean Absolute Error for BLWR is : 3.056783299853078
+
 The Cross-validated Mean Squared Error for RF is : 17.17922265995678
+
 The Cross-validated Mean Absolute Error for RF is : 3.0033395275225674
+
 The Cross-validated Mean Squared Error for XGB is : 16.30102036531247
+
 The Cross-validated Mean Absolute Error for XGB is : 2.9209418791234416
 The Cross-validated Mean Squared Error for NN is : 19.103377219838517
 The Cross-validated Mean Absolute Error for NN is : 2.9168079546614347
