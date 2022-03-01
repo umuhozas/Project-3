@@ -59,11 +59,9 @@ def Epanechnikov(x):
   d = np.sqrt(np.sum(x**2,axis=1))
   return np.where(d>1,0,3/4*(1-d**2)) 
 ```
-
+I created a Locally Weighted Regression Function that performs a regression around a point of interest using only training data that are local to that point. This locally weighted regression function takes the independent, dependent value, the choice of kernel, and hyperparameter tau. In this function, we expect x to be sorted in an increasing order
 ```Python
 #Locally Weighted Regressor
-
-I created a Locally Weighted Regression Function that performs a regression around a point of interest using only training data that are local to that point. This locally weighted regression function takes the independent, dependent value, the choice of kernel, and hyperparameter tau. In this function, we expect x to be sorted in an increasing order
 
 def lw_reg(X, y, xnew, kern, tau, intercept):
     # tau is called bandwidth K((x-x[i])/(2*tau))
@@ -103,6 +101,7 @@ def lw_reg(X, y, xnew, kern, tau, intercept):
       output[np.isnan(output)] = g(xnew[np.isnan(output)])
     return output
 ```
+Before we apply locally weighted regresssion on our dataset, I am going to create a gradient boosting regression function that combnes multiple simple models into a single composite model. this boosted locally weighted regression model is stronger predictor and it requires less time.
 ```Python
 def boosted_lwr(X, y, xnew, kern, tau, intercept):
   # we need decision trees
@@ -122,11 +121,8 @@ I am going to import xgboost because It tells us about the difference between ac
 ```Python
 import xgboost as xgb
 ```
-While training a neural network on the sample data, One of the critical issues is Overfitting. this happens when we use a high number of epochs than needed. The model loses the ability to perform successfully on a data and it is mored accurate on training data than on the test data. To prevent overfitting, we train the model with an optimal number of epochs.
+While training a neural network on the sample data, One of the critical issues is Overfitting. this happens when we use a high number of epochs than needed. The model loses the ability to perform successfully on a data and it is mored accurate on training data than on the test data. To prevent overfitting, we train the model with an optimal number of epochs. we also decide how many layers we want and the number of neurons per layer.
 ```Python
-# we design a Neural Network for regression
-# We have to decide how many layers we want, how many neurons per layer and the type of activation functions
-# Create a Neural Network model
 model_nn = Sequential()
 model_nn.add(Dense(128, activation="relu", input_dim=3))
 model_nn.add(Dense(128, activation="relu"))
@@ -147,15 +143,16 @@ es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=800)
 ```Python
 import lightgbm as lgb
 ```
-Here, I selected features to use as my dependent and independent variable.
+Before the Analysis, I am goind to start with the cars dataset and later, I will try all methods on the Boston housing dataset as well. I separated the data into independent and dependent variables. The dependent variable is Mileage for the cars.
 
+# Model implementation on the cars dataset
 ```Python
 #Let's import our data from google drive
 cars = pd.read_csv('drive/MyDrive/Colab Notebooks/Data_410/data/cars.csv')
 X = cars[['ENG','CYL','WGT']].values
 y = cars['MPG'].values
 ```
-In the code below, I selected the regression analysis method hypothesus to use in calculating the mean absolute errors and mean squared error.
+After separating the data, I am going to apply locally weighted regression, random forest, gradient boosting, neural networks, and others to compare how they predict our data by comparing their Cross-validated Mean Squared Error and The Cross-validated Mean Absorute Error
 
 ```Python
 mse_lwr = []
@@ -224,6 +221,8 @@ print('The Cross-validated Mean Squared Error for NW is : '+str(np.mean(mse_nw))
 print('The Cross-validated Mean Absolute Error for NW is : '+str(np.mean(mae_nw)))
 ```
 
+After running all models, I printed out the results and xgb performs best compared to all the other models, but gradient boosting improved our data as well compared to locally weighted regression. Random forest performs better than locally weighted regression as well.
+
 The Cross-validated Mean Squared Error for LWR is : 16.87007492097876
 
 The Cross-validated Mean Absolute Error for LWR is : 2.982604175901108
@@ -248,6 +247,7 @@ The Cross-validated Mean Squared Error for NW is : 17.244727908363686
 
 The Cross-validated Mean Absolute Error for NW is : 3.0559279028620145
 
+I decided to adjust the random forest and change the value of tau, and I got similar results. gradient boosting still performs better than the locally weighted regression.
 
 ```Python
 mse_lwr = []
@@ -263,7 +263,7 @@ mae_nn = []
 mse_nw = []
 mae_nw = []
 
-for i in [1234]:
+for i in [410]:
   kf = KFold(n_splits=10,shuffle=True,random_state=i)
   scale = StandardScaler()
 # this is the Cross-Validation Loop
@@ -276,7 +276,7 @@ for idxtrain, idxtest in kf.split(X):
   xtest = scale.transform(xtest)
   dat_train = np.concatenate([xtrain,ytrain.reshape(-1,1)],axis=1)
   dat_test = np.concatenate([xtest,ytest.reshape(-1,1)],axis=1)
-  yhat_lwr = lw_reg(xtrain,ytrain, xtest,Tricubic,tau=1,intercept=True)
+  yhat_lwr = lw_reg(xtrain,ytrain, xtest,Tricubic,tau=0.1,intercept=True)
   yhat_blwr = boosted_lwr(xtrain,ytrain, xtest,Tricubic,tau=1,intercept=True)
   model_rf = RandomForestRegressor(n_estimators=100,max_depth=3)
   model_rf.fit(xtrain,ytrain)
@@ -423,7 +423,93 @@ The Cross-validated Mean Absolute Error for RF is : 3.0033395275225674
 The Cross-validated Mean Squared Error for XGB is : 16.30102036531247
 
 The Cross-validated Mean Absolute Error for XGB is : 2.9209418791234416
+
 The Cross-validated Mean Squared Error for NN is : 19.103377219838517
+
 The Cross-validated Mean Absolute Error for NN is : 2.9168079546614347
+
 The Cross-validated Mean Squared Error for NW is : 18.173336639961313
+
 The Cross-validated Mean Absolute Error for NW is : 3.0939539828184883
+
+I decided to adjust the random forest and change the value of tau, and I got similar results. gradient boosting still performs better than the locally weighted regression.
+
+In conclusion, implementing Gradient boosting improved our predictions and after adjusting the kernels, tau, and random forest, it still performed better. 
+
+# Now let's try the same methods on the Boston Housing dataset.
+
+```Python
+#Let's import our data from google drive
+df = pd.read_csv('drive/MyDrive/Colab Notebooks/Data_410/data/Boston Housing Prices.csv')
+
+```
+```Python
+from sklearn.model_selection import KFold
+```
+
+```Python
+X = np.array(df['rooms']).reshape(-1,1)
+y = np.array(df['cmedv']).reshape(-1,1)
+dat = np.concatenate([X,y.reshape(-1,1)], axis=1)
+```
+
+```Python
+kf = KFold(n_splits=10, shuffle=True, random_state=1234)
+scale = StandardScaler()
+```
+
+```Python
+mse_lwr = []
+mae_lwr = []
+mse_blwr = []
+mae_blwr =[]
+mse_rf = []
+mae_rf = []
+mse_xgb = []
+mae_xgb = []
+for idxtrain, idxtest in kf.split(X):
+  xtrain = X[idxtrain]
+  ytrain = y[idxtrain]
+  ytest = y[idxtest]
+  xtest = X[idxtest]
+  xtrain = scale.fit_transform(xtrain)
+  xtest = scale.transform(xtest)
+  yhat_lwr = lw_reg(xtrain, ytrain, xtest, Tricubic, tau = 0.1, intercept = True)
+  model_rf = RandomForestRegressor(n_estimators = 100, max_depth = 3)
+  model_rf.fit(xtrain, ytrain)
+  yhat_rf = model_rf.predict(xtest)
+  yhat_blwr = boosted_lwr(xtrain,ytrain, xtest,Tricubic,tau=0.1,intercept=True)
+  model_xgb = xgb.XGBRegressor(objective ='reg:squarederror',n_estimators=100,reg_lambda=20,alpha=1,gamma=10,max_depth=3)
+  model_xgb.fit(xtrain,ytrain)
+  yhat_xgb = model_xgb.predict(xtest)
+  mse_xgb.append(mse(ytest,yhat_xgb))
+  mse_lwr.append(mse(ytest, yhat_rf))
+  mse_rf.append(mse(ytest,yhat_rf))
+  mae_lwr.append(mean_absolute_error(ytest, yhat_lwr))
+  mae_rf.append(mean_absolute_error(ytest, yhat_rf))
+  mae_xgb.append(mean_absolute_error(ytest, yhat_xgb))
+
+print('The Cross-validated Mean Squared Error for LWR is : '+str(np.mean(mse_lwr)))
+print('The Cross-validated Mean Absolute Error for LWR is : '+str(np.mean(mae_lwr)))
+print('The Cross-validated Mean Squared Error for RF is : '+str(np.mean(mse_rf)))
+print('The Cross-validated Mean Absolute Error for RF is : '+str(np.mean(mae_rf)))
+print('The Cross-validated Mean Squared Error for XGB is : '+str(np.mean(mse_xgb)))
+print('The Cross-validated Mean Absolute Error for XGB is : '+str(np.mean(mae_xgb)))
+
+```
+
+The Cross-validated Mean Squared Error for LWR is : 36.11529907409147
+
+The Cross-validated Mean Absolute Error for LWR is : 4.0833085735801875
+
+The Cross-validated Mean Squared Error for RF is : 36.11529907409147
+
+The Cross-validated Mean Absolute Error for RF is : 4.19290502226899
+
+The Cross-validated Mean Squared Error for XGB is : 36.23637976944626
+
+The Cross-validated Mean Absolute Error for XGB is : 4.175439685524874
+
+
+
+All metods performs worse on the Botson housing dataset. I tried scaling the data, and chnaging the kernel but the Mean squared error remained high. For Boston dataset, Locally weighted regression performs better compared to Random forest. I tried the gradient boosting on the data, but I kept getting an error. I am going to come to office hours to ask questions I had while working on this project. 
